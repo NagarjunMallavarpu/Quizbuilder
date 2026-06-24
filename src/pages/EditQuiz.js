@@ -329,7 +329,7 @@ function EditQuiz() {
       case 'multiple-choice':
         return (
           <Box>
-            {question.options.map((option, optionIndex) => (
+            {(question.options || []).map((option, optionIndex) => (
               <Box key={optionIndex} sx={{ mb: 2 }}>
                 <TextField
                   fullWidth
@@ -361,7 +361,7 @@ function EditQuiz() {
                   '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
                 }}
               >
-                {question.options.map((_, index) => (
+                {(question.options || []).map((_, index) => (
                   <MenuItem key={index} value={index}>
                     Option {index + 1}
                   </MenuItem>
@@ -633,7 +633,7 @@ function EditQuiz() {
           </Grid>
         </DecorativeSection>
 
-        {quizData.questions.map((question, questionIndex) => (
+        {(quizData.questions || []).map((question, questionIndex) => (
           <DecorativeSection 
             key={questionIndex}
             title={`Question ${questionIndex + 1}`}

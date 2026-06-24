@@ -178,17 +178,46 @@ Make sure the questions cover diverse aspects of the topic "${topic}" suitable f
         // Ensure each question matches expected format
         parsedQuiz.questions = parsedQuiz.questions.map(q => {
           const type = category;
+          
+          // Ensure options array exists and has exactly 4 items for multiple choice
+          let safeOptions = [];
+          if (type === 'multiple-choice') {
+            safeOptions = Array.isArray(q.options) 
+              ? [...q.options, '', '', '', ''].slice(0, 4) 
+              : ['', '', '', ''];
+          }
+
+          // Resolve correctAnswer for multiple choice (convert text match to index if needed)
+          let resolvedCorrectAnswer = 0;
+          if (type === 'multiple-choice') {
+            if (q.correctAnswer !== undefined) {
+              const parsedInt = parseInt(q.correctAnswer, 10);
+              if (!isNaN(parsedInt) && parsedInt >= 0 && parsedInt < safeOptions.length) {
+                resolvedCorrectAnswer = parsedInt;
+              } else if (typeof q.correctAnswer === 'string') {
+                const matchedIndex = safeOptions.findIndex(
+                  opt => opt && opt.toString().toLowerCase().trim() === q.correctAnswer.toString().toLowerCase().trim()
+                );
+                if (matchedIndex !== -1) {
+                  resolvedCorrectAnswer = matchedIndex;
+                }
+              }
+            }
+          } else if (type === 'true-false') {
+            resolvedCorrectAnswer = q.correctAnswer ? q.correctAnswer.toString().toLowerCase() : 'true';
+          } else if (type === 'short-answer') {
+            resolvedCorrectAnswer = q.correctAnswer || '';
+          }
+
           return {
             ...q,
             type,
             points: q.points || 1,
-            options: type === 'multiple-choice' ? (q.options || ['', '', '', '']) : [],
-            matchingPairs: type === 'matching' ? (q.matchingPairs || [{ left: '', right: '' }]) : [],
-            correctAnswer: type === 'true-false' ? 
-              (q.correctAnswer ? q.correctAnswer.toString().toLowerCase() : 'true') : 
-              type === 'short-answer' ? 
-                (q.correctAnswer || '') : 
-                (q.correctAnswer !== undefined ? parseInt(q.correctAnswer) : 0)
+            options: safeOptions,
+            matchingPairs: type === 'matching' 
+              ? (Array.isArray(q.matchingPairs) ? q.matchingPairs : [{ left: '', right: '' }]) 
+              : [],
+            correctAnswer: resolvedCorrectAnswer
           };
         });
         
