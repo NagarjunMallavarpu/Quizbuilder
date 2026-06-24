@@ -17,6 +17,7 @@ import {
   Paper,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { quizDb } from '../utils/supabaseClient';
 import SearchIcon from '@mui/icons-material/Search';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -120,48 +121,35 @@ function QuizList() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const userData = JSON.parse(localStorage.getItem('user'));
-    if (!userData) {
-      navigate('/login');
-      return;
-    }
-    setUser(userData);
-
-    // Fetch all quizzes from localStorage
-    const allQuizzes = JSON.parse(localStorage.getItem('quizzes')) || [];
-    
-    // Fix any short answer quizzes that might have options
-    const fixedQuizzes = allQuizzes.map(quiz => {
-      if (quiz.category === 'short-answer') {
-        const fixedQuestions = quiz.questions.map(question => {
-          if (question.type === 'short-answer') {
-            return { ...question, options: [] };
-          }
-          return question;
-        });
-        return { ...quiz, questions: fixedQuestions };
+    const fetchQuizzes = async () => {
+      const userData = JSON.parse(localStorage.getItem('user'));
+      if (!userData) {
+        navigate('/login');
+        return;
       }
-      return quiz;
-    });
-    
-    // Save the fixed quizzes back to localStorage
-    if (JSON.stringify(fixedQuizzes) !== JSON.stringify(allQuizzes)) {
-      localStorage.setItem('quizzes', JSON.stringify(fixedQuizzes));
-      console.log('Fixed short answer quizzes in localStorage');
-    }
-    
-    // Filter quizzes based on user role
-    let filtered;
-    if (userData.role === 'student') {
-      // Students can only see published quizzes
-      filtered = fixedQuizzes.filter((quiz) => quiz.isPublished);
-    } else {
-      // Teachers can see their own quizzes
-      filtered = fixedQuizzes.filter((quiz) => quiz.createdBy === userData.id);
-    }
-    
-    setQuizzes(filtered);
-    setFilteredQuizzes(filtered);
+      setUser(userData);
+
+      try {
+        const allQuizzes = await quizDb.getQuizzes();
+        
+        // Filter quizzes based on user role
+        let filtered;
+        if (userData.role === 'student') {
+          // Students can only see published quizzes
+          filtered = allQuizzes.filter((quiz) => quiz.isPublished);
+        } else {
+          // Teachers can see their own quizzes
+          filtered = allQuizzes.filter((quiz) => quiz.createdBy === userData.id);
+        }
+        
+        setQuizzes(filtered);
+        setFilteredQuizzes(filtered);
+      } catch (err) {
+        console.error("Failed to load quizzes:", err);
+      }
+    };
+
+    fetchQuizzes();
   }, [navigate]);
 
   const handleSearch = (event) => {
@@ -193,55 +181,58 @@ function QuizList() {
     setFilteredQuizzes(filtered);
   };
 
-  const handleDelete = (quizId) => {
+  const handleDelete = async (quizId) => {
     if (window.confirm('Are you sure you want to delete this quiz?')) {
-      const updatedQuizzes = quizzes.filter(quiz => quiz.id !== quizId);
+      try {
+        await quizDb.deleteQuiz(quizId);
+        const updatedQuizzes = quizzes.filter(quiz => quiz.id !== quizId);
+        setQuizzes(updatedQuizzes);
+        setFilteredQuizzes(updatedQuizzes);
+        alert('Quiz deleted successfully');
+      } catch (err) {
+        alert('Failed to delete quiz: ' + err.message);
+      }
+    }
+  };
+
+  const handlePublishToggle = async (quizId) => {
+    const quiz = quizzes.find(q => q.id === quizId);
+    if (!quiz) return;
+
+    try {
+      const nextPublishedState = !quiz.isPublished;
+      await quizDb.updateQuiz(quizId, { isPublished: nextPublishedState });
+      
+      const updatedQuizzes = quizzes.map(q => {
+        if (q.id === quizId) {
+          return { ...q, isPublished: nextPublishedState };
+        }
+        return q;
+      });
       setQuizzes(updatedQuizzes);
       setFilteredQuizzes(updatedQuizzes);
-      
-      const allQuizzes = JSON.parse(localStorage.getItem('quizzes')) || [];
-      const updatedAllQuizzes = allQuizzes.filter(q => q.id !== quizId);
-      localStorage.setItem('quizzes', JSON.stringify(updatedAllQuizzes));
-      
-      alert('Quiz deleted successfully');
+    } catch (err) {
+      alert('Failed to update publish state: ' + err.message);
     }
   };
 
-  const handlePublishToggle = (quizId) => {
-    const updatedQuizzes = quizzes.map(quiz => {
-      if (quiz.id === quizId) {
-        return { ...quiz, isPublished: !quiz.isPublished };
+  const handleTakeQuiz = async (quizId) => {
+    try {
+      const quiz = await quizDb.getQuizById(quizId);
+      if (quiz) {
+        // Ensure quiz category is properly reflected in all questions
+        const updatedQuiz = {
+          ...quiz,
+          questions: (quiz.questions || []).map(q => ({
+            ...q,
+            type: quiz.category
+          }))
+        };
+        await quizDb.updateQuiz(quizId, updatedQuiz);
       }
-      return quiz;
-    });
-    setQuizzes(updatedQuizzes);
-    setFilteredQuizzes(updatedQuizzes);
-    localStorage.setItem('quizzes', JSON.stringify(updatedQuizzes));
-  };
-
-  const handleTakeQuiz = (quizId) => {
-    // Get the quiz and ensure it's properly set up before navigating
-    const allQuizzes = JSON.parse(localStorage.getItem('quizzes')) || [];
-    const quiz = allQuizzes.find(q => q.id === quizId);
-    
-    if (quiz) {
-      // Ensure quiz category is properly reflected in all questions
-      const updatedQuiz = {
-        ...quiz,
-        questions: quiz.questions.map(q => ({
-          ...q,
-          type: quiz.category // Ensure each question's type matches the quiz category
-        }))
-      };
-      
-      // Save back to localStorage
-      const updatedQuizzes = allQuizzes.map(q => 
-        q.id === quizId ? updatedQuiz : q
-      );
-      
-      localStorage.setItem('quizzes', JSON.stringify(updatedQuizzes));
+    } catch (err) {
+      console.error("Failed to sync quiz before taking:", err);
     }
-    
     navigate(`/take-quiz/${quizId}`);
   };
 

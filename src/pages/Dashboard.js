@@ -28,6 +28,7 @@ import {
   IconButton,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { quizDb } from '../utils/supabaseClient';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import PeopleIcon from '@mui/icons-material/People';
 import QuizIcon from '@mui/icons-material/Quiz';
@@ -71,22 +72,23 @@ function Dashboard() {
       return;
     }
     
-    // Calculate statistics from localStorage data
+    // Calculate statistics from database
     calculateStats(userData.id);
   }, [navigate]);
 
-  const calculateStats = (userId) => {
+  const calculateStats = async (userId) => {
     setIsLoading(true);
     
-    // Get all quizzes created by this teacher
-    const allQuizzes = JSON.parse(localStorage.getItem('quizzes')) || [];
-    const teacherQuizzes = allQuizzes.filter(quiz => quiz.createdBy === userId);
-    
-    // Get all quiz results
-    const allResults = JSON.parse(localStorage.getItem('quizResults')) || [];
-    const resultsForTeacherQuizzes = allResults.filter(result => 
-      teacherQuizzes.some(quiz => quiz.id === result.quizId)
-    );
+    try {
+      // Get all quizzes created by this teacher
+      const allQuizzes = await quizDb.getQuizzes();
+      const teacherQuizzes = allQuizzes.filter(quiz => quiz.createdBy === userId);
+      
+      // Get all quiz results
+      const allResults = JSON.parse(localStorage.getItem('quizResults')) || [];
+      const resultsForTeacherQuizzes = allResults.filter(result => 
+        teacherQuizzes.some(quiz => quiz.id.toString() === result.quizId.toString())
+      );
     
     // Count quizzes by type
     const quizzesByType = {
@@ -223,7 +225,11 @@ function Dashboard() {
       topPerformingQuizzes: topQuizzes,
     });
     
-    setIsLoading(false);
+    } catch (err) {
+      console.error("Failed to calculate dashboard statistics:", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const toggleStudentExpand = (studentId) => {

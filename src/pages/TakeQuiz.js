@@ -15,6 +15,7 @@ import {
   LinearProgress,
 } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
+import { quizDb } from '../utils/supabaseClient';
 
 function TakeQuiz() {
   const { id } = useParams();
@@ -31,81 +32,88 @@ function TakeQuiz() {
   const [codeError, setCodeError] = useState('');
 
   useEffect(() => {
-    // Get user data
-    const userData = JSON.parse(localStorage.getItem('user'));
-    if (!userData) {
-      navigate('/login');
-      return;
-    }
-    setUser(userData);
-
-    // Load quiz from localStorage
-    const allQuizzes = JSON.parse(localStorage.getItem('quizzes')) || [];
-    let selectedQuiz = allQuizzes.find(q => q.id === parseInt(id) || q.id === id);
-    
-    if (selectedQuiz) {
-      // Ensure quiz type consistency
-      if (selectedQuiz.category) {
-        // Make sure each question has the type matching the quiz category
-        selectedQuiz = {
-          ...selectedQuiz,
-          questions: selectedQuiz.questions.map(q => ({
-            ...q,
-            type: selectedQuiz.category,
-            // Ensure appropriate data structures based on question type
-            options: selectedQuiz.category === 'multiple-choice' ? (q.options?.length ? q.options : ['', '', '', '']) : [],
-            matchingPairs: selectedQuiz.category === 'matching' ? 
-              (q.matchingPairs?.length ? q.matchingPairs : [{ left: '', right: '' }]) : [],
-            correctAnswer: selectedQuiz.category === 'true-false' ? 
-              (q.correctAnswer || 'true') : 
-              selectedQuiz.category === 'short-answer' ? 
-                (q.correctAnswer || '') : 
-                (q.correctAnswer ?? 0)
-          }))
-        };
-      }
-      
-      // For students, verify that the quiz is published
-      if (userData.role === 'student' && !selectedQuiz.isPublished) {
-        setError('This quiz is not available for students');
-        setLoading(false);
+    const fetchQuiz = async () => {
+      // Get user data
+      const userData = JSON.parse(localStorage.getItem('user'));
+      if (!userData) {
+        navigate('/login');
         return;
       }
+      setUser(userData);
 
-      // For teachers, verify they own the quiz or it's published
-      if (userData.role === 'teacher' && 
-          selectedQuiz.createdBy !== userData.id && 
-          !selectedQuiz.isPublished) {
-        setError('You do not have access to this quiz');
+      try {
+        let selectedQuiz = await quizDb.getQuizById(id);
+        
+        if (selectedQuiz) {
+          // Ensure quiz type consistency
+          if (selectedQuiz.category) {
+            // Make sure each question has the type matching the quiz category
+            selectedQuiz = {
+              ...selectedQuiz,
+              questions: (selectedQuiz.questions || []).map(q => ({
+                ...q,
+                type: selectedQuiz.category,
+                // Ensure appropriate data structures based on question type
+                options: selectedQuiz.category === 'multiple-choice' ? (q.options?.length ? q.options : ['', '', '', '']) : [],
+                matchingPairs: selectedQuiz.category === 'matching' ? 
+                  (q.matchingPairs?.length ? q.matchingPairs : [{ left: '', right: '' }]) : [],
+                correctAnswer: selectedQuiz.category === 'true-false' ? 
+                  (q.correctAnswer || 'true') : 
+                  selectedQuiz.category === 'short-answer' ? 
+                    (q.correctAnswer || '') : 
+                    (q.correctAnswer ?? 0)
+              }))
+            };
+          }
+          
+          // For students, verify that the quiz is published
+          if (userData.role === 'student' && !selectedQuiz.isPublished) {
+            setError('This quiz is not available for students');
+            setLoading(false);
+            return;
+          }
+
+          // For teachers, verify they own the quiz or it's published
+          if (userData.role === 'teacher' && 
+              selectedQuiz.createdBy !== userData.id && 
+              !selectedQuiz.isPublished) {
+            setError('You do not have access to this quiz');
+            setLoading(false);
+            return;
+          }
+          
+          console.log('Loaded quiz:', selectedQuiz); // Debug log
+          setQuiz(selectedQuiz);
+
+          // Check if access code is required
+          if (userData.role === 'student' && selectedQuiz.accessCode) {
+            setIsCodeVerified(false);
+          } else {
+            setIsCodeVerified(true);
+          }
+          
+          // Initialize answers object
+          const initialAnswers = {};
+          (selectedQuiz.questions || []).forEach((_, index) => {
+            initialAnswers[index] = '';
+          });
+          setAnswers(initialAnswers);
+          
+          // Set timer if time limit exists
+          if (selectedQuiz.timeLimit > 0) {
+            setTimeLeft(selectedQuiz.timeLimit * 60); // Convert minutes to seconds
+          }
+        } else {
+          setError('Quiz not found');
+        }
+      } catch (err) {
+        setError('Failed to load quiz: ' + err.message);
+      } finally {
         setLoading(false);
-        return;
       }
-      
-      console.log('Loaded quiz:', selectedQuiz); // Debug log
-      setQuiz(selectedQuiz);
+    };
 
-      // Check if access code is required
-      if (userData.role === 'student' && selectedQuiz.accessCode) {
-        setIsCodeVerified(false);
-      } else {
-        setIsCodeVerified(true);
-      }
-      
-      // Initialize answers object
-      const initialAnswers = {};
-      selectedQuiz.questions.forEach((_, index) => {
-        initialAnswers[index] = '';
-      });
-      setAnswers(initialAnswers);
-      
-      // Set timer if time limit exists
-      if (selectedQuiz.timeLimit > 0) {
-        setTimeLeft(selectedQuiz.timeLimit * 60); // Convert minutes to seconds
-      }
-    } else {
-      setError('Quiz not found');
-    }
-    setLoading(false);
+    fetchQuiz();
   }, [id, navigate]);
 
   useEffect(() => {

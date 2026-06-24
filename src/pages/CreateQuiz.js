@@ -27,6 +27,7 @@ import {
 import { useNavigate, useLocation } from 'react-router-dom';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import { generateAIQuizContent } from '../utils/ai';
+import { quizDb } from '../utils/supabaseClient';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';
@@ -437,7 +438,7 @@ function CreateQuiz() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Validate all fields are filled
@@ -451,7 +452,7 @@ function CreateQuiz() {
       if (!q.question) return true;
       
       if (q.type === 'multiple-choice') {
-        return q.options.some(opt => !opt);
+        return (q.options || []).some(opt => !opt);
       } else if (q.type === 'matching') {
         return !q.matchingPairs || q.matchingPairs.some(pair => !pair.left || !pair.right);
       } else if (q.type === 'short-answer') {
@@ -484,18 +485,18 @@ function CreateQuiz() {
 
     const newQuiz = {
       ...quizData,
-      id: Date.now(),
       createdBy: userData.id,
-      createdAt: new Date().toISOString(),
       isPublished: false,
       accessCode: generateAccessCode(),
     };
 
-    const existingQuizzes = JSON.parse(localStorage.getItem('quizzes')) || [];
-    localStorage.setItem('quizzes', JSON.stringify([...existingQuizzes, newQuiz]));
-
-    alert(`Quiz created successfully! Access Code: ${newQuiz.accessCode}`);
-    navigate('/quiz-list');
+    try {
+      const savedQuiz = await quizDb.createQuiz(newQuiz);
+      alert(`Quiz created successfully! Access Code: ${savedQuiz.accessCode}`);
+      navigate('/quiz-list');
+    } catch (err) {
+      alert('Failed to save quiz: ' + err.message);
+    }
   };
   
   // Get quiz type specific details

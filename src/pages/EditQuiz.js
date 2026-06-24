@@ -19,6 +19,7 @@ import {
   FormLabel,
 } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
+import { quizDb } from '../utils/supabaseClient';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';
@@ -112,36 +113,42 @@ function EditQuiz() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const userData = JSON.parse(localStorage.getItem('user'));
-    if (!userData) {
-      navigate('/login');
-      return;
-    }
-
-    const quizzes = JSON.parse(localStorage.getItem('quizzes')) || [];
-    const quiz = quizzes.find(q => q.id === parseInt(id));
-
-    if (!quiz) {
-      setError('Quiz not found');
-      return;
-    }
-
-    if (quiz.createdBy !== userData.id) {
-      setError('You do not have permission to edit this quiz');
-      return;
-    }
-
-    // Ensure accessCode exists
-    if (!quiz.accessCode) {
-      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-      let code = '';
-      for (let i = 0; i < 6; i++) {
-        code += chars.charAt(Math.floor(Math.random() * chars.length));
+    const loadQuiz = async () => {
+      const userData = JSON.parse(localStorage.getItem('user'));
+      if (!userData) {
+        navigate('/login');
+        return;
       }
-      quiz.accessCode = code;
-    }
 
-    setQuizData(quiz);
+      try {
+        const quiz = await quizDb.getQuizById(id);
+        if (!quiz) {
+          setError('Quiz not found');
+          return;
+        }
+
+        if (quiz.createdBy !== userData.id) {
+          setError('You do not have permission to edit this quiz');
+          return;
+        }
+
+        // Ensure accessCode exists
+        if (!quiz.accessCode) {
+          const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+          let code = '';
+          for (let i = 0; i < 6; i++) {
+            code += chars.charAt(Math.floor(Math.random() * chars.length));
+          }
+          quiz.accessCode = code;
+        }
+
+        setQuizData(quiz);
+      } catch (err) {
+        setError('Error loading quiz: ' + err.message);
+      }
+    };
+
+    loadQuiz();
   }, [id, navigate]);
 
   const handleQuizChange = (e) => {
@@ -271,7 +278,7 @@ function EditQuiz() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!quizData.title || !quizData.description || !quizData.category) {
@@ -283,9 +290,9 @@ function EditQuiz() {
       if (!q.question) return true;
       
       if (q.type === 'matching') {
-        return q.matchingPairs.some(pair => !pair.left || !pair.right);
+        return (q.matchingPairs || []).some(pair => !pair.left || !pair.right);
       } else if (q.type === 'multiple-choice') {
-        return q.options.some(opt => !opt);
+        return (q.options || []).some(opt => !opt);
       } else if (q.type === 'short-answer') {
         return !q.correctAnswer;
       }
@@ -298,13 +305,13 @@ function EditQuiz() {
       return;
     }
 
-    const quizzes = JSON.parse(localStorage.getItem('quizzes')) || [];
-    const updatedQuizzes = quizzes.map(q => 
-      q.id === quizData.id ? quizData : q
-    );
-    
-    localStorage.setItem('quizzes', JSON.stringify(updatedQuizzes));
-    navigate('/quiz-list');
+    try {
+      await quizDb.updateQuiz(quizData.id, quizData);
+      alert('Quiz updated successfully!');
+      navigate('/quiz-list');
+    } catch (err) {
+      alert('Failed to update quiz: ' + err.message);
+    }
   };
 
   if (error) {

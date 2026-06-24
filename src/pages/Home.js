@@ -13,6 +13,7 @@ import {
   Paper,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { quizDb } from '../utils/supabaseClient';
 import QuizIcon from '@mui/icons-material/Quiz';
 import HistoryIcon from '@mui/icons-material/History';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
@@ -114,7 +115,7 @@ function Home() {
   const [joinCode, setJoinCode] = useState('');
   const [joinError, setJoinError] = useState('');
 
-  const handleJoinQuiz = (e) => {
+  const handleJoinQuiz = async (e) => {
     e.preventDefault();
     setJoinError('');
     if (!joinCode.trim()) {
@@ -122,37 +123,46 @@ function Home() {
       return;
     }
 
-    const allQuizzes = JSON.parse(localStorage.getItem('quizzes')) || [];
-    const targetQuiz = allQuizzes.find(
-      q => q.accessCode && q.accessCode.trim().toUpperCase() === joinCode.trim().toUpperCase()
-    );
+    try {
+      const targetQuiz = await quizDb.getQuizByAccessCode(joinCode.trim());
 
-    if (!targetQuiz) {
-      setJoinError('No quiz found with this access code.');
-      return;
+      if (!targetQuiz) {
+        setJoinError('No quiz found with this access code.');
+        return;
+      }
+
+      if (!targetQuiz.isPublished) {
+        setJoinError('This quiz is currently in draft mode and cannot be joined.');
+        return;
+      }
+
+      // Navigate to start the quiz
+      navigate(`/take-quiz/${targetQuiz.id}`);
+    } catch (err) {
+      setJoinError('Error checking quiz code: ' + err.message);
     }
-
-    if (!targetQuiz.isPublished) {
-      setJoinError('This quiz is currently in draft mode and cannot be joined.');
-      return;
-    }
-
-    // Navigate to start the quiz
-    navigate(`/take-quiz/${targetQuiz.id}`);
   };
 
   useEffect(() => {
-    const userData = JSON.parse(localStorage.getItem('user'));
-    if (userData) {
-      setUser(userData);
-      
-      // Count published quizzes for students
-      if (userData.role === 'student') {
-        const allQuizzes = JSON.parse(localStorage.getItem('quizzes')) || [];
-        const publishedQuizzes = allQuizzes.filter(quiz => quiz.isPublished);
-        setPublishedQuizCount(publishedQuizzes.length);
+    const checkUserAndQuizzes = async () => {
+      const userData = JSON.parse(localStorage.getItem('user'));
+      if (userData) {
+        setUser(userData);
+        
+        // Count published quizzes for students
+        if (userData.role === 'student') {
+          try {
+            const allQuizzes = await quizDb.getQuizzes();
+            const publishedQuizzes = allQuizzes.filter(quiz => quiz.isPublished);
+            setPublishedQuizCount(publishedQuizzes.length);
+          } catch (err) {
+            console.error("Failed to fetch quizzes for count:", err);
+          }
+        }
       }
-    }
+    };
+
+    checkUserAndQuizzes();
   }, [navigate]);
 
   if (!user) {
