@@ -18,6 +18,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { quizDb } from '../utils/supabaseClient';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import QuizIcon from '@mui/icons-material/Quiz';
@@ -48,10 +49,14 @@ function ImportExport() {
     loadUserQuizzes(userData.id);
   }, [navigate]);
 
-  const loadUserQuizzes = (userId) => {
-    const allQuizzes = JSON.parse(localStorage.getItem('quizzes')) || [];
-    const filteredQuizzes = allQuizzes.filter(quiz => quiz.createdBy === userId);
-    setUserQuizzes(filteredQuizzes);
+  const loadUserQuizzes = async (userId) => {
+    try {
+      const allQuizzes = await quizDb.getQuizzes();
+      const filteredQuizzes = allQuizzes.filter(quiz => String(quiz.createdBy) === String(userId));
+      setUserQuizzes(filteredQuizzes);
+    } catch (error) {
+      console.error("Failed to load quizzes for import/export:", error);
+    }
   };
 
   const handleExportClick = () => {
@@ -163,13 +168,20 @@ function ImportExport() {
         }
       });
       
-      // Save successful imports to localStorage
+      // Save successful imports
       if (successQuizzes.length > 0) {
-        const existingQuizzes = JSON.parse(localStorage.getItem('quizzes')) || [];
-        localStorage.setItem('quizzes', JSON.stringify([...existingQuizzes, ...successQuizzes]));
-        
-        // Reload user quizzes
-        loadUserQuizzes(user.id);
+        const saveImports = async () => {
+          try {
+            for (const quiz of successQuizzes) {
+              await quizDb.createQuiz(quiz);
+            }
+            // Reload user quizzes
+            loadUserQuizzes(user.id);
+          } catch (error) {
+            console.error("Failed to save imported quizzes:", error);
+          }
+        };
+        saveImports();
       }
       
       setImportStatus({

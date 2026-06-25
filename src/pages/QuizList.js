@@ -22,61 +22,14 @@ import SearchIcon from '@mui/icons-material/Search';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import AddIcon from '@mui/icons-material/Add';
 import PublishIcon from '@mui/icons-material/Publish';
 import UnpublishedIcon from '@mui/icons-material/Unpublished';
 import QuizIcon from '@mui/icons-material/Quiz';
 import SchoolIcon from '@mui/icons-material/School';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 
-// Decorative background component
-const DecorativeBackground = () => (
-  <Box
-    sx={{
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      zIndex: -1,
-      overflow: 'hidden',
-      opacity: 0.1,
-    }}
-  >
-    <Box
-      sx={{
-        position: 'absolute',
-        top: '10%',
-        left: '5%',
-        transform: 'rotate(-15deg)',
-        animation: 'float 6s ease-in-out infinite',
-      }}
-    >
-      <QuizIcon sx={{ fontSize: 100, color: '#3498DB' }} />
-    </Box>
-    <Box
-      sx={{
-        position: 'absolute',
-        top: '20%',
-        right: '10%',
-        transform: 'rotate(15deg)',
-        animation: 'float 8s ease-in-out infinite',
-      }}
-    >
-      <SchoolIcon sx={{ fontSize: 80, color: '#E67E22' }} />
-    </Box>
-    <Box
-      sx={{
-        position: 'absolute',
-        bottom: '15%',
-        left: '15%',
-        transform: 'rotate(10deg)',
-        animation: 'float 7s ease-in-out infinite',
-      }}
-    >
-      <EmojiEventsIcon sx={{ fontSize: 90, color: '#9B59B6' }} />
-    </Box>
-  </Box>
-);
+const DecorativeBackground = () => null;
 
 
 const DecorativeCard = ({ children, iconColor, buttonColor, hoverColor }) => (
@@ -139,7 +92,7 @@ function QuizList() {
           filtered = allQuizzes.filter((quiz) => quiz.isPublished);
         } else {
           // Teachers can see their own quizzes
-          filtered = allQuizzes.filter((quiz) => quiz.createdBy === userData.id);
+          filtered = allQuizzes.filter((quiz) => String(quiz.createdBy) === String(userData.id));
         }
         
         setQuizzes(filtered);
@@ -245,7 +198,6 @@ function QuizList() {
       <Box 
         sx={{ 
           mb: 4,
-          textAlign: 'center',
           background: 'linear-gradient(135deg, #2563eb 0%, #0d9488 100%)',
           borderRadius: 3,
           p: 4,
@@ -253,6 +205,11 @@ function QuizList() {
           boxShadow: '0 8px 16px rgba(37, 99, 235, 0.2)',
           position: 'relative',
           overflow: 'hidden',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 2,
           '&::after': {
             content: '""',
             position: 'absolute',
@@ -265,14 +222,38 @@ function QuizList() {
           },
         }}
       >
-        <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
-          {user?.role === 'teacher' ? 'My Quizzes' : 'Available Quizzes'}
-        </Typography>
-        <Typography variant="subtitle1" sx={{ opacity: 0.95 }}>
-          {user?.role === 'teacher' 
-            ? 'Manage your quizzes and track student progress'
-            : 'Browse and take quizzes created by your teachers'}
-        </Typography>
+        <Box sx={{ textAlign: { xs: 'center', md: 'left' } }}>
+          <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
+            {user?.role === 'teacher' ? 'My Quizzes' : 'Available Quizzes'}
+          </Typography>
+          <Typography variant="subtitle1" sx={{ opacity: 0.95 }}>
+            {user?.role === 'teacher' 
+              ? 'Manage your quizzes and track student progress'
+              : 'Browse and take quizzes created by your teachers'}
+          </Typography>
+        </Box>
+        {user?.role === 'teacher' && (
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => navigate('/create-quiz')}
+            sx={{
+              fontWeight: 'bold',
+              backgroundColor: '#2ECC71',
+              color: 'white',
+              boxShadow: '0 4px 14px 0 rgba(46, 204, 113, 0.4)',
+              zIndex: 1,
+              '&:hover': {
+                backgroundColor: '#27AE60',
+                boxShadow: '0 6px 20px 0 rgba(46, 204, 113, 0.6)',
+                transform: 'translateY(-2px)',
+              },
+              transition: 'all 0.2s',
+            }}
+          >
+            Create Quiz
+          </Button>
+        )}
       </Box>
 
       <Paper 

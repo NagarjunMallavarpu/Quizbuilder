@@ -26,54 +26,7 @@ import StarsIcon from '@mui/icons-material/Stars';
 import SchoolOutlinedIcon from '@mui/icons-material/SchoolOutlined';
 
 // Decorative background component
-const DecorativeBackground = () => (
-  <Box
-    sx={{
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      zIndex: -1,
-      overflow: 'hidden',
-      opacity: 0.1,
-    }}
-  >
-    <Box
-      sx={{
-        position: 'absolute',
-        top: '10%',
-        left: '5%',
-        transform: 'rotate(-15deg)',
-        animation: 'float 6s ease-in-out infinite',
-      }}
-    >
-      <SchoolOutlinedIcon sx={{ fontSize: 100, color: '#3498DB' }} />
-    </Box>
-    <Box
-      sx={{
-        position: 'absolute',
-        top: '20%',
-        right: '10%',
-        transform: 'rotate(15deg)',
-        animation: 'float 8s ease-in-out infinite',
-      }}
-    >
-      <LightbulbIcon sx={{ fontSize: 80, color: '#E67E22' }} />
-    </Box>
-    <Box
-      sx={{
-        position: 'absolute',
-        bottom: '15%',
-        left: '15%',
-        transform: 'rotate(10deg)',
-        animation: 'float 7s ease-in-out infinite',
-      }}
-    >
-      <StarsIcon sx={{ fontSize: 90, color: '#9B59B6' }} />
-    </Box>
-  </Box>
-);
+const DecorativeBackground = () => null;
 
 const DecorativeCard = ({ children, iconColor, buttonColor, hoverColor }) => (
   <Card 
@@ -88,18 +41,18 @@ const DecorativeCard = ({ children, iconColor, buttonColor, hoverColor }) => (
       position: 'relative',
       overflow: 'hidden',
       '&:hover': {
-        transform: 'translateY(-8px)',
-        boxShadow: `0 15px 35px rgba(${iconColor === '#3498DB' ? '52, 152, 219' : iconColor === '#2ECC71' ? '46, 204, 113' : iconColor === '#E67E22' ? '230, 126, 34' : '155, 89, 182'}, 0.25)`,
+        transform: 'scale(1.04) translateY(-6px)',
+        boxShadow: `0 20px 40px rgba(${iconColor === '#3498DB' ? '52, 152, 219' : iconColor === '#2ECC71' ? '46, 204, 113' : iconColor === '#E67E22' ? '230, 126, 34' : '155, 89, 182'}, 0.3)`,
         borderColor: iconColor,
       },
-      transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+      transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
       '&::before': {
         content: '""',
         position: 'absolute',
         top: 0,
         left: 0,
         right: 0,
-        height: '3px',
+        height: '4px',
         background: `linear-gradient(90deg, ${iconColor}, transparent)`,
       },
     }}
@@ -137,7 +90,7 @@ function Home() {
       }
 
       // Navigate to start the quiz
-      navigate(`/take-quiz/${targetQuiz.id}`);
+      navigate(`/take-quiz/${targetQuiz.id}`, { state: { accessCode: joinCode.trim(), codeVerified: true } });
     } catch (err) {
       setJoinError('Error checking quiz code: ' + err.message);
     }
@@ -343,11 +296,11 @@ function Home() {
           sx={{ 
             mb: 6,
             textAlign: 'center',
-            background: 'linear-gradient(45deg, #2C3E50 30%, #34495E 90%)',
-            borderRadius: 3,
-            p: 4,
+            background: 'linear-gradient(135deg, #6366f1 0%, #3b82f6 50%, #10b981 100%)',
+            borderRadius: 4,
+            p: 5,
             color: 'white',
-            boxShadow: '0 8px 16px rgba(44, 62, 80, 0.3)',
+            boxShadow: '0 12px 24px rgba(59, 130, 246, 0.3)',
             position: 'relative',
             overflow: 'hidden',
             '&::after': {
@@ -357,16 +310,16 @@ function Home() {
               left: 0,
               right: 0,
               bottom: 0,
-              background: 'radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 0%, transparent 70%)',
+              background: 'radial-gradient(circle at 50% 50%, rgba(255,255,255,0.2) 0%, transparent 70%)',
               pointerEvents: 'none',
             },
           }}
         >
-          <Typography variant="h3" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
-            Welcome, {user.name}!
+          <Typography variant="h3" component="h1" gutterBottom sx={{ fontWeight: '900', letterSpacing: '-0.5px' }}>
+            Welcome back, {user.name}! 👋🎓
           </Typography>
-          <Typography variant="h6" sx={{ opacity: 0.9 }}>
-            Ready to test your knowledge? Browse available quizzes and start learning!
+          <Typography variant="h6" sx={{ opacity: 0.95, fontWeight: 500 }}>
+            Ready to test your knowledge? Browse available quizzes, challenge yourself, and learn with AI tutor feedback! 🧠✨
           </Typography>
           {publishedQuizCount > 0 && (
             <Alert 
@@ -391,15 +344,15 @@ function Home() {
           sx={{ 
             p: 4, 
             mb: 4, 
-            color: 'white',
+            color: 'text.primary',
             borderRadius: 3,
-            boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.4)',
+            boxShadow: '0 8px 32px 0 rgba(15, 23, 42, 0.08)',
           }}
         >
           <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1 }}>
             Join Quiz with Access Code
           </Typography>
-          <Typography variant="body2" sx={{ opacity: 0.8, mb: 3 }}>
+          <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
             Enter the 6-character code shared by your teacher to jump straight into the quiz.
           </Typography>
           
@@ -414,13 +367,13 @@ function Home() {
                 sx={{
                   flexGrow: 1,
                   maxWidth: '300px',
-                  bgcolor: 'rgba(255, 255, 255, 0.1)',
+                  bgcolor: 'rgba(0, 0, 0, 0.03)',
                   borderRadius: 1,
                   '& .MuiOutlinedInput-root': {
-                    color: 'white',
-                    '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.3)' },
-                    '&:hover fieldset': { borderColor: 'rgba(255, 255, 255, 0.6)' },
-                    '&.Mui-focused fieldset': { borderColor: '#90caf9' },
+                    color: 'text.primary',
+                    '& fieldset': { borderColor: 'rgba(0, 0, 0, 0.15)' },
+                    '&:hover fieldset': { borderColor: 'rgba(0, 0, 0, 0.3)' },
+                    '&.Mui-focused fieldset': { borderColor: 'primary.main' },
                   }
                 }}
               />
@@ -447,7 +400,7 @@ function Home() {
           </form>
 
           {joinError && (
-            <Alert severity="error" sx={{ mt: 2, bgcolor: 'rgba(231, 76, 60, 0.2)', color: 'white', border: '1px solid rgba(231, 76, 60, 0.4)' }}>
+            <Alert severity="error" sx={{ mt: 2 }}>
               {joinError}
             </Alert>
           )}
@@ -568,11 +521,11 @@ function Home() {
         sx={{ 
           mb: 6,
           textAlign: 'center',
-          background: 'linear-gradient(45deg, #2C3E50 30%, #34495E 90%)',
-          borderRadius: 3,
-          p: 4,
+          background: 'linear-gradient(135deg, #f43f5e 0%, #a855f7 100%)',
+          borderRadius: 4,
+          p: 5,
           color: 'white',
-          boxShadow: '0 8px 16px rgba(44, 62, 80, 0.3)',
+          boxShadow: '0 12px 24px rgba(244, 63, 94, 0.3)',
           position: 'relative',
           overflow: 'hidden',
           '&::after': {
@@ -582,16 +535,16 @@ function Home() {
             left: 0,
             right: 0,
             bottom: 0,
-            background: 'radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 0%, transparent 70%)',
+            background: 'radial-gradient(circle at 50% 50%, rgba(255,255,255,0.2) 0%, transparent 70%)',
             pointerEvents: 'none',
           },
         }}
       >
-        <Typography variant="h3" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
-          Welcome, {user.name}!
+        <Typography variant="h3" component="h1" gutterBottom sx={{ fontWeight: '900', letterSpacing: '-0.5px' }}>
+          Welcome, Teacher {user.name}! 👨‍🏫🌟
         </Typography>
-        <Typography variant="h6" sx={{ opacity: 0.9 }}>
-          Create and manage quizzes for your students. Choose from different quiz types to engage your class.
+        <Typography variant="h6" sx={{ opacity: 0.95, fontWeight: 500 }}>
+          Create interactive quizzes and manage your students' learning progress. Choose from different styles below! 📝✨
         </Typography>
       </Box>
 
@@ -635,8 +588,22 @@ function Home() {
         {`
           @keyframes float {
             0% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(5deg); }
+            50% { transform: translateY(-15px) rotate(3deg); }
             100% { transform: translateY(0px) rotate(0deg); }
+          }
+          @keyframes float-reverse {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-22px) rotate(-6deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+          }
+          @keyframes bounce-slow {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+          }
+          @keyframes wiggle {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
           }
         `}
       </style>

@@ -14,12 +14,13 @@ import {
   CircularProgress,
   LinearProgress,
 } from '@mui/material';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { quizDb } from '../utils/supabaseClient';
 
 function TakeQuiz() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [quiz, setQuiz] = useState(null);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
@@ -75,7 +76,7 @@ function TakeQuiz() {
 
           // For teachers, verify they own the quiz or it's published
           if (userData.role === 'teacher' && 
-              selectedQuiz.createdBy !== userData.id && 
+              String(selectedQuiz.createdBy) !== String(userData.id) && 
               !selectedQuiz.isPublished) {
             setError('You do not have access to this quiz');
             setLoading(false);
@@ -86,7 +87,8 @@ function TakeQuiz() {
           setQuiz(selectedQuiz);
 
           // Check if access code is required
-          if (userData.role === 'student' && selectedQuiz.accessCode) {
+          const passedVerified = location.state?.codeVerified || false;
+          if (userData.role === 'student' && selectedQuiz.accessCode && !passedVerified) {
             setIsCodeVerified(false);
           } else {
             setIsCodeVerified(true);

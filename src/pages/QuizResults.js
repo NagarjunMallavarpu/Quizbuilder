@@ -20,6 +20,7 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import LightbulbIcon from '@mui/icons-material/Lightbulb';
 import { fetchAIInsight } from '../utils/ai';
+import { quizDb } from '../utils/supabaseClient';
 
 function QuizResults() {
   const { id } = useParams();
@@ -58,33 +59,40 @@ function QuizResults() {
       return;
     }
 
-    // Get all results
-    const results = JSON.parse(localStorage.getItem('quizResults')) || [];
-    
-    // Find the most recent result for this quiz for the current user
-    const userResults = results
-      .filter(result => result.quizId?.toString() === id?.toString())
-      .filter(result => result.userId?.toString() === userData.id?.toString())
-      .sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt));
-    
-    if (userResults.length > 0) {
-      const result = userResults[0];
-      setQuizResult(result);
+    const fetchResultAndQuiz = async () => {
+      // Get all results
+      const results = JSON.parse(localStorage.getItem('quizResults')) || [];
       
-      // Get the original quiz
-      const quizzes = JSON.parse(localStorage.getItem('quizzes')) || [];
-      const foundQuiz = quizzes.find(q => q.id?.toString() === id?.toString());
+      // Find the most recent result for this quiz for the current user
+      const userResults = results
+        .filter(result => result.quizId?.toString() === id?.toString())
+        .filter(result => result.userId?.toString() === userData.id?.toString())
+        .sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt));
       
-      if (foundQuiz) {
-        setQuiz(foundQuiz);
+      if (userResults.length > 0) {
+        const result = userResults[0];
+        setQuizResult(result);
+        
+        try {
+          // Get the original quiz
+          const foundQuiz = await quizDb.getQuizById(id);
+          
+          if (foundQuiz) {
+            setQuiz(foundQuiz);
+          } else {
+            console.error('Quiz not found');
+          }
+        } catch (err) {
+          console.error('Failed to fetch quiz details:', err);
+        }
       } else {
-        console.error('Quiz not found');
+        console.error('Result not found');
       }
-    } else {
-      console.error('Result not found');
-    }
-    
-    setLoading(false);
+      
+      setLoading(false);
+    };
+
+    fetchResultAndQuiz();
   }, [id, navigate]);
 
   if (loading) {

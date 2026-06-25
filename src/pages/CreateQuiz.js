@@ -42,93 +42,7 @@ import ScienceIcon from '@mui/icons-material/Science';
 import PsychologyIcon from '@mui/icons-material/Psychology';
 
 // Decorative background component
-const DecorativeBackground = ({ quizType }) => {
-  // Different colors and icons based on quiz type
-  const getIconStyle = () => {
-    switch (quizType) {
-      case 'multiple-choice':
-        return { 
-          primary: <QuizIcon sx={{ fontSize: 100, color: '#3498DB', opacity: 0.2 }} />,
-          secondary: <LightbulbIcon sx={{ fontSize: 80, color: '#2980B9', opacity: 0.2 }} />,
-          tertiary: <SchoolIcon sx={{ fontSize: 90, color: '#1ABC9C', opacity: 0.2 }} />
-        };
-      case 'true-false':
-        return { 
-          primary: <CheckCircleOutlineIcon sx={{ fontSize: 100, color: '#2ECC71', opacity: 0.2 }} />,
-          secondary: <ScienceIcon sx={{ fontSize: 80, color: '#27AE60', opacity: 0.2 }} />,
-          tertiary: <SchoolIcon sx={{ fontSize: 90, color: '#F1C40F', opacity: 0.2 }} />
-        };
-      case 'short-answer':
-        return { 
-          primary: <ShortTextIcon sx={{ fontSize: 100, color: '#E67E22', opacity: 0.2 }} />,
-          secondary: <PsychologyIcon sx={{ fontSize: 80, color: '#D35400', opacity: 0.2 }} />,
-          tertiary: <SchoolIcon sx={{ fontSize: 90, color: '#3498DB', opacity: 0.2 }} />
-        };
-      case 'matching':
-        return { 
-          primary: <CompareArrowsIcon sx={{ fontSize: 100, color: '#9B59B6', opacity: 0.2 }} />,
-          secondary: <DragIndicatorIcon sx={{ fontSize: 80, color: '#8E44AD', opacity: 0.2 }} />,
-          tertiary: <SchoolIcon sx={{ fontSize: 90, color: '#E74C3C', opacity: 0.2 }} />
-        };
-      default:
-        return { 
-          primary: <QuizIcon sx={{ fontSize: 100, color: '#3498DB', opacity: 0.2 }} />,
-          secondary: <LightbulbIcon sx={{ fontSize: 80, color: '#2980B9', opacity: 0.2 }} />,
-          tertiary: <SchoolIcon sx={{ fontSize: 90, color: '#1ABC9C', opacity: 0.2 }} />
-        };
-    }
-  };
-
-  const icons = getIconStyle();
-
-  return (
-    <Box
-      sx={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        zIndex: -1,
-        overflow: 'hidden',
-      }}
-    >
-      <Box
-        sx={{
-          position: 'absolute',
-          top: '10%',
-          left: '5%',
-          transform: 'rotate(-15deg)',
-          animation: 'float 6s ease-in-out infinite',
-        }}
-      >
-        {icons.primary}
-      </Box>
-      <Box
-        sx={{
-          position: 'absolute',
-          top: '20%',
-          right: '10%',
-          transform: 'rotate(15deg)',
-          animation: 'float 8s ease-in-out infinite',
-        }}
-      >
-        {icons.secondary}
-      </Box>
-      <Box
-        sx={{
-          position: 'absolute',
-          bottom: '15%',
-          left: '15%',
-          transform: 'rotate(10deg)',
-          animation: 'float 7s ease-in-out infinite',
-        }}
-      >
-        {icons.tertiary}
-      </Box>
-    </Box>
-  );
-};
+const DecorativeBackground = () => null;
 
 // Decorative section component
 const DecorativeSection = ({ children, title, icon, quizType }) => {
@@ -556,29 +470,14 @@ function CreateQuiz() {
                   value={option}
                   onChange={(e) => handleOptionChange(questionIndex, optionIndex, e.target.value)}
                   required
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.3)' },
-                      '&:hover fieldset': { borderColor: 'rgba(255, 255, 255, 0.5)' },
-                      '&.Mui-focused fieldset': { borderColor: 'white' },
-                    },
-                    '& .MuiInputLabel-root': { color: 'white' },
-                    '& .MuiInputBase-input': { color: 'white' },
-                  }}
                 />
               </Box>
             ))}
             <FormControl fullWidth sx={{ mt: 2 }}>
-              <InputLabel sx={{ color: 'white' }}>Correct Answer</InputLabel>
+              <InputLabel>Correct Answer</InputLabel>
               <Select
                 value={question.correctAnswer}
                 onChange={(e) => handleQuestionChange(questionIndex, 'correctAnswer', e.target.value)}
-                sx={{
-                  color: 'white',
-                  '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.3)' },
-                  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.5)' },
-                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
-                }}
               >
                 {(question.options || []).map((_, index) => (
                   <MenuItem key={index} value={index}>
@@ -593,7 +492,7 @@ function CreateQuiz() {
       case 'true-false':
         return (
           <FormControl component="fieldset" sx={{ mt: 2 }}>
-            <FormLabel component="legend" sx={{ color: 'white' }}>Correct Answer</FormLabel>
+            <FormLabel component="legend" sx={{ color: 'text.secondary', fontWeight: '500' }}>Correct Answer</FormLabel>
             <RadioGroup
               value={question.correctAnswer}
               onChange={(e) => handleQuestionChange(questionIndex, 'correctAnswer', e.target.value)}
@@ -601,15 +500,15 @@ function CreateQuiz() {
             >
               <FormControlLabel
                 value="true"
-                control={<Radio sx={{ color: 'white' }} />}
+                control={<Radio color="primary" />}
                 label="True"
-                sx={{ color: 'white' }}
+                sx={{ color: 'text.primary' }}
               />
               <FormControlLabel
                 value="false"
-                control={<Radio sx={{ color: 'white' }} />}
+                control={<Radio color="primary" />}
                 label="False"
-                sx={{ color: 'white' }}
+                sx={{ color: 'text.primary' }}
               />
             </RadioGroup>
           </FormControl>
@@ -618,7 +517,7 @@ function CreateQuiz() {
       case 'short-answer':
         return (
           <Box sx={{ mt: 2 }}>
-            <Typography variant="body2" color="white" sx={{ mb: 2, opacity: 0.7 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
               Enter the key terms or exact answer students should provide. The system will use this to check if the student's answer contains these terms.
             </Typography>
             <TextField
@@ -628,19 +527,9 @@ function CreateQuiz() {
               onChange={(e) => handleQuestionChange(questionIndex, 'correctAnswer', e.target.value)}
               required
               helperText="Enter the most important keywords or the exact answer you expect"
-              sx={{
-                mt: 2,
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.3)' },
-                  '&:hover fieldset': { borderColor: 'rgba(255, 255, 255, 0.5)' },
-                  '&.Mui-focused fieldset': { borderColor: 'white' },
-                },
-                '& .MuiInputLabel-root': { color: 'white' },
-                '& .MuiInputBase-input': { color: 'white' },
-                '& .MuiFormHelperText-root': { color: 'rgba(255, 255, 255, 0.7)' },
-              }}
+              sx={{ mt: 2 }}
             />
-            <Typography variant="caption" sx={{ display: 'block', mt: 1, color: 'rgba(255, 255, 255, 0.7)' }}>
+            <Typography variant="caption" sx={{ display: 'block', mt: 1, color: 'text.secondary' }}>
               Note: For more complex answers, you'll need to manually review student responses later.
             </Typography>
           </Box>
@@ -657,32 +546,14 @@ function CreateQuiz() {
                   value={pair.left}
                   onChange={(e) => handleMatchingPairChange(questionIndex, pairIndex, 'left', e.target.value)}
                   required
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.3)' },
-                      '&:hover fieldset': { borderColor: 'rgba(255, 255, 255, 0.5)' },
-                      '&.Mui-focused fieldset': { borderColor: 'white' },
-                    },
-                    '& .MuiInputLabel-root': { color: 'white' },
-                    '& .MuiInputBase-input': { color: 'white' },
-                  }}
                 />
-                <DragIndicatorIcon sx={{ color: 'white' }} />
+                <DragIndicatorIcon sx={{ color: 'action.active' }} />
                 <TextField
                   fullWidth
                   label={`Right Item ${pairIndex + 1}`}
                   value={pair.right}
                   onChange={(e) => handleMatchingPairChange(questionIndex, pairIndex, 'right', e.target.value)}
                   required
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.3)' },
-                      '&:hover fieldset': { borderColor: 'rgba(255, 255, 255, 0.5)' },
-                      '&.Mui-focused fieldset': { borderColor: 'white' },
-                    },
-                    '& .MuiInputLabel-root': { color: 'white' },
-                    '& .MuiInputBase-input': { color: 'white' },
-                  }}
                 />
                 {(question.matchingPairs || []).length > 1 && (
                   <IconButton
@@ -700,11 +571,11 @@ function CreateQuiz() {
               onClick={() => addMatchingPair(questionIndex)}
               sx={{
                 mt: 2,
-                color: 'white',
-                borderColor: 'white',
+                color: getButtonColor(),
+                borderColor: getButtonColor(),
                 '&:hover': {
-                  borderColor: 'rgba(255, 255, 255, 0.8)',
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                  borderColor: getButtonHoverColor(),
+                  backgroundColor: `${getButtonColor()}1A`
                 }
               }}
             >
@@ -839,15 +710,6 @@ function CreateQuiz() {
                 value={quizData.title}
                 onChange={handleQuizChange}
                 required
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.3)' },
-                    '&:hover fieldset': { borderColor: 'rgba(255, 255, 255, 0.5)' },
-                    '&.Mui-focused fieldset': { borderColor: 'white' },
-                  },
-                  '& .MuiInputLabel-root': { color: 'white' },
-                  '& .MuiInputBase-input': { color: 'white' },
-                }}
               />
             </Grid>
             <Grid item xs={12}>
@@ -860,31 +722,16 @@ function CreateQuiz() {
                 multiline
                 rows={3}
                 required
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.3)' },
-                    '&:hover fieldset': { borderColor: 'rgba(255, 255, 255, 0.5)' },
-                    '&.Mui-focused fieldset': { borderColor: 'white' },
-                  },
-                  '& .MuiInputLabel-root': { color: 'white' },
-                  '& .MuiInputBase-input': { color: 'white' },
-                }}
               />
             </Grid>
             <Grid item xs={12} md={6}>
               <FormControl fullWidth>
-                <InputLabel sx={{ color: 'white' }}>Quiz Type</InputLabel>
+                <InputLabel>Quiz Type</InputLabel>
                 <Select
                   name="category"
                   value={quizData.category}
                   onChange={handleQuizChange}
                   required
-                  sx={{
-                    color: 'white',
-                    '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.3)' },
-                    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.5)' },
-                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
-                  }}
                 >
                   <MenuItem value="multiple-choice">Multiple Choice</MenuItem>
                   <MenuItem value="true-false">True/False</MenuItem>
@@ -901,15 +748,6 @@ function CreateQuiz() {
                 type="number"
                 value={quizData.timeLimit}
                 onChange={handleQuizChange}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.3)' },
-                    '&:hover fieldset': { borderColor: 'rgba(255, 255, 255, 0.5)' },
-                    '&.Mui-focused fieldset': { borderColor: 'white' },
-                  },
-                  '& .MuiInputLabel-root': { color: 'white' },
-                  '& .MuiInputBase-input': { color: 'white' },
-                }}
               />
             </Grid>
           </Grid>
@@ -919,7 +757,7 @@ function CreateQuiz() {
           <DecorativeSection 
             key={questionIndex}
             title={`Question ${questionIndex + 1}`}
-            icon={<SchoolIcon sx={{ fontSize: 30, color: 'white' }} />}
+            icon={<SchoolIcon sx={{ fontSize: 30 }} />}
             quizType={quizData.category}
           >
             <Box sx={{ mb: 2 }}>
@@ -929,15 +767,6 @@ function CreateQuiz() {
                 value={question.question}
                 onChange={(e) => handleQuestionChange(questionIndex, 'question', e.target.value)}
                 required
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.3)' },
-                    '&:hover fieldset': { borderColor: 'rgba(255, 255, 255, 0.5)' },
-                    '&.Mui-focused fieldset': { borderColor: 'white' },
-                  },
-                  '& .MuiInputLabel-root': { color: 'white' },
-                  '& .MuiInputBase-input': { color: 'white' },
-                }}
               />
             </Box>
 
@@ -965,11 +794,11 @@ function CreateQuiz() {
             startIcon={<AddIcon />}
             onClick={addQuestion}
             sx={{ 
-              color: 'white',
-              borderColor: 'white',
+              color: getButtonColor(),
+              borderColor: getButtonColor(),
               '&:hover': { 
-                borderColor: 'rgba(255, 255, 255, 0.8)',
-                backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                borderColor: getButtonHoverColor(),
+                backgroundColor: `${getButtonColor()}1A`
               }
             }}
           >

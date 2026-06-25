@@ -15,6 +15,84 @@ import EditQuiz from './pages/EditQuiz';
 import Dashboard from './pages/Dashboard';
 import ImportExport from './pages/ImportExport';
 import StudentResult from './pages/StudentResult';
+import About from './pages/About';
+import SchoolOutlinedIcon from '@mui/icons-material/SchoolOutlined';
+import LightbulbIcon from '@mui/icons-material/Lightbulb';
+import ScienceIcon from '@mui/icons-material/Science';
+import PsychologyIcon from '@mui/icons-material/Psychology';
+import StarsIcon from '@mui/icons-material/Stars';
+
+const DecorativeBackground = () => (
+  <Box
+    sx={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      zIndex: 0,
+      overflow: 'hidden',
+      opacity: 0.12,
+      pointerEvents: 'none',
+    }}
+  >
+    <Box
+      sx={{
+        position: 'absolute',
+        top: '12%',
+        left: '5%',
+        transform: 'rotate(-15deg)',
+        animation: 'float 7s ease-in-out infinite',
+      }}
+    >
+      <SchoolOutlinedIcon sx={{ fontSize: 100, color: '#FF6B6B', filter: 'drop-shadow(3px 3px 0px rgba(0,0,0,0.1))' }} />
+    </Box>
+    <Box
+      sx={{
+        position: 'absolute',
+        top: '20%',
+        right: '8%',
+        transform: 'rotate(15deg)',
+        animation: 'float-reverse 9s ease-in-out infinite',
+      }}
+    >
+      <LightbulbIcon sx={{ fontSize: 80, color: '#FFD93D', filter: 'drop-shadow(3px 3px 0px rgba(0,0,0,0.1))' }} />
+    </Box>
+    <Box
+      sx={{
+        position: 'absolute',
+        bottom: '25%',
+        left: '6%',
+        transform: 'rotate(10deg)',
+        animation: 'wiggle 5s ease-in-out infinite',
+      }}
+    >
+      <ScienceIcon sx={{ fontSize: 90, color: '#6BCB77', filter: 'drop-shadow(3px 3px 0px rgba(0,0,0,0.1))' }} />
+    </Box>
+    <Box
+      sx={{
+        position: 'absolute',
+        bottom: '15%',
+        right: '10%',
+        transform: 'rotate(-10deg)',
+        animation: 'float 8s ease-in-out infinite',
+      }}
+    >
+      <PsychologyIcon sx={{ fontSize: 95, color: '#FF9F43', filter: 'drop-shadow(3px 3px 0px rgba(0,0,0,0.1))' }} />
+    </Box>
+    <Box
+      sx={{
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        animation: 'bounce-slow 6s ease-in-out infinite',
+      }}
+    >
+      <StarsIcon sx={{ fontSize: 70, color: '#4D96FF', filter: 'drop-shadow(2px 2px 0px rgba(0,0,0,0.1))' }} />
+    </Box>
+  </Box>
+);
 
 const theme = createTheme({
   typography: {
@@ -155,6 +233,7 @@ function App() {
           backgroundAttachment: 'fixed',
         }}>
           <Navbar />
+          <DecorativeBackground />
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
@@ -230,6 +309,10 @@ function App() {
                   <StudentResult />
                 </TeacherRoute>
               }
+            />
+            <Route
+              path="/about"
+              element={<About />}
             />
           </Routes>
           <Box 

@@ -20,6 +20,7 @@ import {
   Alert,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { quizDb } from '../utils/supabaseClient';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SchoolIcon from '@mui/icons-material/School';
@@ -51,9 +52,16 @@ function Profile() {
 
     // Load user's quizzes if teacher
     if (userData.role === 'teacher') {
-      const allQuizzes = JSON.parse(localStorage.getItem('userQuizzes') || '[]');
-      const userQuizzes = allQuizzes.filter(quiz => quiz.createdBy === userData.id);
-      setQuizzes(userQuizzes);
+      const fetchTeacherQuizzes = async () => {
+        try {
+          const allQuizzes = await quizDb.getQuizzes();
+          const userQuizzes = allQuizzes.filter(quiz => String(quiz.createdBy) === String(userData.id));
+          setQuizzes(userQuizzes);
+        } catch (err) {
+          console.error("Failed to load quizzes for profile:", err);
+        }
+      };
+      fetchTeacherQuizzes();
     }
 
     // Load quiz results
@@ -123,9 +131,18 @@ function Profile() {
 
       // Remove user's quizzes if teacher
       if (user.role === 'teacher') {
-        const allQuizzes = JSON.parse(localStorage.getItem('userQuizzes') || '[]');
-        const updatedQuizzes = allQuizzes.filter(quiz => quiz.createdBy !== user.id);
-        localStorage.setItem('userQuizzes', JSON.stringify(updatedQuizzes));
+        const deleteTeacherQuizzes = async () => {
+          try {
+            const allQuizzes = await quizDb.getQuizzes();
+            const quizzesToDelete = allQuizzes.filter(quiz => String(quiz.createdBy) === String(user.id));
+            for (const q of quizzesToDelete) {
+              await quizDb.deleteQuiz(q.id);
+            }
+          } catch (err) {
+            console.error("Failed to delete user's quizzes:", err);
+          }
+        };
+        deleteTeacherQuizzes();
       }
 
       // Remove user's quiz results
@@ -208,10 +225,16 @@ function Profile() {
                         <IconButton
                           edge="end"
                           color="error"
-                          onClick={() => {
-                            const updatedQuizzes = quizzes.filter(q => q.id !== quiz.id);
-                            setQuizzes(updatedQuizzes);
-                            localStorage.setItem('userQuizzes', JSON.stringify(updatedQuizzes));
+                          onClick={async () => {
+                            if (window.confirm('Are you sure you want to delete this quiz?')) {
+                              try {
+                                await quizDb.deleteQuiz(quiz.id);
+                                const updatedQuizzes = quizzes.filter(q => q.id !== quiz.id);
+                                setQuizzes(updatedQuizzes);
+                              } catch (err) {
+                                console.error("Failed to delete quiz:", err);
+                              }
+                            }
                           }}
                         >
                           <DeleteIcon />

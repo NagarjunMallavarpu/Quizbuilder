@@ -82,7 +82,7 @@ function Dashboard() {
     try {
       // Get all quizzes created by this teacher
       const allQuizzes = await quizDb.getQuizzes();
-      const teacherQuizzes = allQuizzes.filter(quiz => quiz.createdBy === userId);
+      const teacherQuizzes = allQuizzes.filter(quiz => String(quiz.createdBy) === String(userId));
       
       // Get all quiz results
       const allResults = JSON.parse(localStorage.getItem('quizResults')) || [];
@@ -262,19 +262,17 @@ function Dashboard() {
         sx={{
           mb: 4,
           textAlign: 'center',
-          background: 'rgba(255, 255, 255, 0.02)',
-          backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
+          background: 'linear-gradient(135deg, #2563eb 0%, #0d9488 100%)',
           borderRadius: 3,
           p: 4,
           color: 'white',
-          boxShadow: '0 12px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
+          boxShadow: '0 8px 16px rgba(37, 99, 235, 0.2)',
         }}
       >
-        <Typography variant="h3" component="h1" gutterBottom>
+        <Typography variant="h3" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
           Teacher Dashboard
         </Typography>
-        <Typography variant="h6">
+        <Typography variant="h6" sx={{ opacity: 0.95 }}>
           View statistics and analytics for your quizzes
         </Typography>
       </Box>
@@ -290,10 +288,10 @@ function Dashboard() {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              color: 'white',
+              color: 'text.primary',
               borderRadius: 2,
               borderLeft: '4px solid #3498DB !important',
-              boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.3)',
+              boxShadow: '0 8px 32px 0 rgba(15, 23, 42, 0.08)',
             }}
           >
             <QuizIcon sx={{ fontSize: 48, mb: 1, color: '#3498DB' }} />
@@ -312,10 +310,10 @@ function Dashboard() {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              color: 'white',
+              color: 'text.primary',
               borderRadius: 2,
               borderLeft: '4px solid #2ECC71 !important',
-              boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.3)',
+              boxShadow: '0 8px 32px 0 rgba(15, 23, 42, 0.08)',
             }}
           >
             <PeopleIcon sx={{ fontSize: 48, mb: 1, color: '#2ECC71' }} />
@@ -334,10 +332,10 @@ function Dashboard() {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              color: 'white',
+              color: 'text.primary',
               borderRadius: 2,
               borderLeft: '4px solid #E67E22 !important',
-              boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.3)',
+              boxShadow: '0 8px 32px 0 rgba(15, 23, 42, 0.08)',
             }}
           >
             <AssignmentTurnedInIcon sx={{ fontSize: 48, mb: 1, color: '#E67E22' }} />
@@ -356,10 +354,10 @@ function Dashboard() {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              color: 'white',
+              color: 'text.primary',
               borderRadius: 2,
               borderLeft: '4px solid #9B59B6 !important',
-              boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.3)',
+              boxShadow: '0 8px 32px 0 rgba(15, 23, 42, 0.08)',
             }}
           >
             <BarChartIcon sx={{ fontSize: 48, mb: 1, color: '#9B59B6' }} />

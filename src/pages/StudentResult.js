@@ -70,7 +70,7 @@ function StudentResult() {
         }
         
         // Verify teacher has access to this quiz
-        if (quizData.createdBy !== userData.id) {
+        if (String(quizData.createdBy) !== String(userData.id)) {
           setError('You do not have permission to view this quiz attempt');
           setLoading(false);
           return;

@@ -13,6 +13,7 @@ import {
   Chip,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { quizDb } from '../utils/supabaseClient';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import AddIcon from '@mui/icons-material/Add';
 import ListIcon from '@mui/icons-material/List';
@@ -21,6 +22,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import ImportExportIcon from '@mui/icons-material/ImportExport';
 import NotificationsIcon from '@mui/icons-material/Notifications';
+import HelpIcon from '@mui/icons-material/Help';
 
 function Navbar() {
   const navigate = useNavigate();
@@ -44,11 +46,11 @@ function Navbar() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const checkRecentAttempts = () => {
+  const checkRecentAttempts = async () => {
     try {
       // Get all quizzes created by this teacher
-      const allQuizzes = JSON.parse(localStorage.getItem('quizzes')) || [];
-      const teacherQuizzes = allQuizzes.filter(quiz => quiz.createdBy === user.id);
+      const allQuizzes = await quizDb.getQuizzes();
+      const teacherQuizzes = allQuizzes.filter(quiz => String(quiz.createdBy) === String(user.id));
       
       if (teacherQuizzes.length === 0) {
         setNotificationCount(0);
@@ -65,7 +67,7 @@ function Navbar() {
       
       const recentResults = allResults.filter(result => {
         return (
-          teacherQuizzes.some(quiz => quiz.id === result.quizId) &&
+          teacherQuizzes.some(quiz => String(quiz.id) === String(result.quizId)) &&
           new Date(result.completedAt) > oneDayAgo
         );
       });
@@ -75,9 +77,9 @@ function Navbar() {
       
       // Add quiz and student info to the results
       const resultsWithDetails = recentResults.map(result => {
-        const quiz = teacherQuizzes.find(q => q.id === result.quizId);
+        const quiz = teacherQuizzes.find(q => String(q.id) === String(result.quizId));
         const users = JSON.parse(localStorage.getItem('users')) || [];
-        const student = users.find(u => u.id === result.userId);
+        const student = users.find(u => String(u.id) === String(result.userId));
         
         return {
           id: result.id,
@@ -197,6 +199,20 @@ function Navbar() {
               >
                 Home
               </Button>
+              <Button
+                onClick={() => navigate('/quiz-list')}
+                startIcon={<ListIcon />}
+                sx={{
+                  color: '#475569',
+                  fontWeight: '600',
+                  '&:hover': {
+                    backgroundColor: 'rgba(37, 99, 235, 0.08)',
+                    color: '#2563eb',
+                  },
+                }}
+              >
+                Quiz List
+              </Button>
               {user.role === 'teacher' && (
                 <>
                   <Button
@@ -244,8 +260,8 @@ function Navbar() {
                 </>
               )}
               <Button
-                onClick={() => navigate('/quiz-list')}
-                startIcon={<ListIcon />}
+                onClick={() => navigate('/about')}
+                startIcon={<HelpIcon />}
                 sx={{
                   color: '#475569',
                   fontWeight: '600',
@@ -255,7 +271,7 @@ function Navbar() {
                   },
                 }}
               >
-                Quiz List
+                About
               </Button>
               <Button
                 onClick={() => navigate('/profile')}
@@ -434,6 +450,20 @@ function Navbar() {
               }}
             >
               Home
+            </Button>
+            <Button
+              onClick={() => navigate('/about')}
+              startIcon={<HelpIcon />}
+              sx={{
+                color: '#475569',
+                fontWeight: '600',
+                '&:hover': {
+                  backgroundColor: 'rgba(37, 99, 235, 0.08)',
+                  color: '#2563eb',
+                },
+              }}
+            >
+              About
             </Button>
             <Button 
               onClick={() => navigate('/login')}
