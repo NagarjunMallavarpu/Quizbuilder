@@ -298,7 +298,7 @@ function Home() {
             textAlign: 'center',
             background: 'linear-gradient(135deg, #6366f1 0%, #3b82f6 50%, #10b981 100%)',
             borderRadius: 4,
-            p: 5,
+            p: { xs: 3, md: 5 },
             color: 'white',
             boxShadow: '0 12px 24px rgba(59, 130, 246, 0.3)',
             position: 'relative',
@@ -315,10 +315,10 @@ function Home() {
             },
           }}
         >
-          <Typography variant="h3" component="h1" gutterBottom sx={{ fontWeight: '900', letterSpacing: '-0.5px' }}>
+          <Typography variant="h3" component="h1" gutterBottom sx={{ fontWeight: '900', letterSpacing: '-0.5px', fontSize: { xs: '1.8rem', sm: '2.5rem', md: '3rem' } }}>
             Welcome back, {user.name}! 👋🎓
           </Typography>
-          <Typography variant="h6" sx={{ opacity: 0.95, fontWeight: 500 }}>
+          <Typography variant="h6" sx={{ opacity: 0.95, fontWeight: 500, fontSize: { xs: '0.95rem', md: '1.25rem' } }}>
             Ready to test your knowledge? Browse available quizzes, challenge yourself, and learn with AI tutor feedback! 🧠✨
           </Typography>
           {publishedQuizCount > 0 && (
@@ -523,7 +523,7 @@ function Home() {
           textAlign: 'center',
           background: 'linear-gradient(135deg, #f43f5e 0%, #a855f7 100%)',
           borderRadius: 4,
-          p: 5,
+          p: { xs: 3, md: 5 },
           color: 'white',
           boxShadow: '0 12px 24px rgba(244, 63, 94, 0.3)',
           position: 'relative',
@@ -540,10 +540,10 @@ function Home() {
           },
         }}
       >
-        <Typography variant="h3" component="h1" gutterBottom sx={{ fontWeight: '900', letterSpacing: '-0.5px' }}>
+        <Typography variant="h3" component="h1" gutterBottom sx={{ fontWeight: '900', letterSpacing: '-0.5px', fontSize: { xs: '1.8rem', sm: '2.5rem', md: '3rem' } }}>
           Welcome, Teacher {user.name}! 👨‍🏫🌟
         </Typography>
-        <Typography variant="h6" sx={{ opacity: 0.95, fontWeight: 500 }}>
+        <Typography variant="h6" sx={{ opacity: 0.95, fontWeight: 500, fontSize: { xs: '0.95rem', md: '1.25rem' } }}>
           Create interactive quizzes and manage your students' learning progress. Choose from different styles below! 📝✨
         </Typography>
       </Box>

@@ -11,6 +11,13 @@ import {
   Badge,
   Tooltip,
   Chip,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Divider,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { quizDb } from '../utils/supabaseClient';
@@ -23,6 +30,7 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import ImportExportIcon from '@mui/icons-material/ImportExport';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import HelpIcon from '@mui/icons-material/Help';
+import MenuIcon from '@mui/icons-material/Menu';
 
 function Navbar() {
   const navigate = useNavigate();
@@ -30,7 +38,12 @@ function Navbar() {
   const [notificationAnchorEl, setNotificationAnchorEl] = useState(null);
   const [notificationCount, setNotificationCount] = useState(0);
   const [recentAttempts, setRecentAttempts] = useState([]);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const user = JSON.parse(localStorage.getItem('user'));
+
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
 
   useEffect(() => {
     // Only load notifications for teachers
@@ -152,6 +165,123 @@ function Navbar() {
     navigate('/login');
   };
 
+  const drawerContent = (
+    <Box onClick={handleDrawerToggle} sx={{ textAlign: 'center', p: 2 }}>
+      <Typography
+        variant="h6"
+        sx={{
+          my: 2,
+          fontWeight: '900',
+          letterSpacing: '1.2px',
+          background: 'linear-gradient(135deg, #2563eb 0%, #0d9488 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          cursor: 'pointer',
+        }}
+        onClick={() => navigate('/')}
+      >
+        Quizora
+      </Typography>
+      <Divider sx={{ mb: 2 }} />
+      <List>
+        <ListItem disablePadding>
+          <ListItemButton onClick={() => navigate('/')}>
+            <ListItemIcon><HomeIcon /></ListItemIcon>
+            <ListItemText primary="Home" />
+          </ListItemButton>
+        </ListItem>
+        
+        {user ? (
+          <>
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => navigate('/quiz-list')}>
+                <ListItemIcon><ListIcon /></ListItemIcon>
+                <ListItemText primary="Quiz List" />
+              </ListItemButton>
+            </ListItem>
+            
+            {user.role === 'teacher' && (
+              <>
+                <ListItem disablePadding>
+                  <ListItemButton onClick={() => navigate('/create-quiz')}>
+                    <ListItemIcon><AddIcon /></ListItemIcon>
+                    <ListItemText primary="Create Quiz" />
+                  </ListItemButton>
+                </ListItem>
+                <ListItem disablePadding>
+                  <ListItemButton onClick={() => navigate('/dashboard')}>
+                    <ListItemIcon><DashboardIcon /></ListItemIcon>
+                    <ListItemText primary="Dashboard" />
+                  </ListItemButton>
+                </ListItem>
+                <ListItem disablePadding>
+                  <ListItemButton onClick={() => navigate('/import-export')}>
+                    <ListItemIcon><ImportExportIcon /></ListItemIcon>
+                    <ListItemText primary="Import/Export" />
+                  </ListItemButton>
+                </ListItem>
+              </>
+            )}
+            
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => navigate('/about')}>
+                <ListItemIcon><HelpIcon /></ListItemIcon>
+                <ListItemText primary="About" />
+              </ListItemButton>
+            </ListItem>
+            
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => navigate('/profile')}>
+                <ListItemIcon><PersonIcon /></ListItemIcon>
+                <ListItemText primary="Profile" />
+              </ListItemButton>
+            </ListItem>
+            
+            <ListItem disablePadding sx={{ mt: 2 }}>
+              <Button
+                fullWidth
+                variant="outlined"
+                color="error"
+                onClick={handleLogout}
+                sx={{ fontWeight: 'bold' }}
+              >
+                Logout
+              </Button>
+            </ListItem>
+          </>
+        ) : (
+          <>
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => navigate('/about')}>
+                <ListItemIcon><HelpIcon /></ListItemIcon>
+                <ListItemText primary="About" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => navigate('/login')}>
+                <ListItemIcon><AccountCircle /></ListItemIcon>
+                <ListItemText primary="Sign In" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding sx={{ px: 2, mt: 2 }}>
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={() => navigate('/register')}
+                sx={{
+                  fontWeight: 'bold',
+                  background: 'linear-gradient(45deg, #2563eb 30%, #0d9488 90%)',
+                }}
+              >
+                Register
+              </Button>
+            </ListItem>
+          </>
+        )}
+      </List>
+    </Box>
+  );
+
   return (
     <AppBar 
       position="sticky" 
@@ -166,6 +296,17 @@ function Navbar() {
       }}
     >
       <Toolbar>
+        {/* Mobile Hamburger Menu */}
+        <IconButton
+          color="inherit"
+          aria-label="open drawer"
+          edge="start"
+          onClick={handleDrawerToggle}
+          sx={{ mr: 1, display: { md: 'none' } }}
+        >
+          <MenuIcon />
+        </IconButton>
+
         <Typography
           variant="h6"
           component="div"
@@ -182,9 +323,11 @@ function Navbar() {
         >
           Quizora
         </Typography>
+
         {user ? (
           <>
-            <Box sx={{ display: 'flex', gap: 2, mr: 2 }}>
+            {/* Desktop Navigation Links */}
+            <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2, mr: 2 }}>
               <Button
                 onClick={() => navigate('/')}
                 startIcon={<HomeIcon />}
@@ -317,7 +460,7 @@ function Navbar() {
               onClose={handleNotificationClose}
               PaperProps={{
                 sx: {
-                  width: 350,
+                  width: 320,
                   maxHeight: 400,
                   overflowY: 'auto',
                   backgroundColor: 'rgba(255, 255, 255, 0.95)',
@@ -436,65 +579,90 @@ function Navbar() {
             </Menu>
           </>
         ) : (
-          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-            <Button
-              onClick={() => navigate('/')}
-              startIcon={<HomeIcon />}
-              sx={{
-                color: '#475569',
-                fontWeight: '600',
-                '&:hover': {
-                  backgroundColor: 'rgba(37, 99, 235, 0.08)',
-                  color: '#2563eb',
-                },
-              }}
-            >
-              Home
-            </Button>
-            <Button
-              onClick={() => navigate('/about')}
-              startIcon={<HelpIcon />}
-              sx={{
-                color: '#475569',
-                fontWeight: '600',
-                '&:hover': {
-                  backgroundColor: 'rgba(37, 99, 235, 0.08)',
-                  color: '#2563eb',
-                },
-              }}
-            >
-              About
-            </Button>
-            <Button 
-              onClick={() => navigate('/login')}
-              sx={{
-                color: '#475569',
-                fontWeight: '600',
-                '&:hover': {
-                  backgroundColor: 'rgba(37, 99, 235, 0.08)',
-                  color: '#2563eb',
-                },
-              }}
-            >
-              Sign In
-            </Button>
-            <Button 
-              variant="contained"
-              color="primary"
-              onClick={() => navigate('/register')}
-              sx={{
-                fontWeight: 'bold',
-                background: 'linear-gradient(45deg, #2563eb 30%, #0d9488 90%)',
-                '&:hover': {
-                  background: 'linear-gradient(45deg, #1d4ed8 30%, #0f766e 90%)',
-                }
-              }}
-            >
-              Register
-            </Button>
-          </Box>
+          <>
+            {/* Desktop Logged-Out Links */}
+            <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2, alignItems: 'center' }}>
+              <Button
+                onClick={() => navigate('/')}
+                startIcon={<HomeIcon />}
+                sx={{
+                  color: '#475569',
+                  fontWeight: '600',
+                  '&:hover': {
+                    backgroundColor: 'rgba(37, 99, 235, 0.08)',
+                    color: '#2563eb',
+                  },
+                }}
+              >
+                Home
+              </Button>
+              <Button
+                onClick={() => navigate('/about')}
+                startIcon={<HelpIcon />}
+                sx={{
+                  color: '#475569',
+                  fontWeight: '600',
+                  '&:hover': {
+                    backgroundColor: 'rgba(37, 99, 235, 0.08)',
+                    color: '#2563eb',
+                  },
+                }}
+              >
+                About
+              </Button>
+              <Button 
+                onClick={() => navigate('/login')}
+                sx={{
+                  color: '#475569',
+                  fontWeight: '600',
+                  '&:hover': {
+                    backgroundColor: 'rgba(37, 99, 235, 0.08)',
+                    color: '#2563eb',
+                  },
+                }}
+              >
+                Sign In
+              </Button>
+              <Button 
+                variant="contained"
+                color="primary"
+                onClick={() => navigate('/register')}
+                sx={{
+                  fontWeight: 'bold',
+                  background: 'linear-gradient(45deg, #2563eb 30%, #0d9488 90%)',
+                  '&:hover': {
+                    background: 'linear-gradient(45deg, #1d4ed8 30%, #0f766e 90%)',
+                  }
+                }}
+              >
+                Register
+              </Button>
+            </Box>
+          </>
         )}
       </Toolbar>
+
+      {/* Mobile Drawer */}
+      <Drawer
+        variant="temporary"
+        open={mobileOpen}
+        onClose={handleDrawerToggle}
+        ModalProps={{
+          keepMounted: true,
+        }}
+        sx={{
+          display: { xs: 'block', md: 'none' },
+          '& .MuiDrawer-paper': { 
+            boxSizing: 'border-box', 
+            width: 250,
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            borderRight: '1px solid rgba(0, 0, 0, 0.08)',
+          },
+        }}
+      >
+        {drawerContent}
+      </Drawer>
     </AppBar>
   );
 }
